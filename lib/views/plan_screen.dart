@@ -1,5 +1,6 @@
 import '../models/data_layer.dart'; // Mengimpor model Plan dan Task dari folder models
 import 'package:flutter/material.dart'; // Mengimpor material design untuk membuat UI di Flutter
+import '../provider/plan_provider.dart';
 
 late ScrollController scrollController;
 
@@ -40,90 +41,89 @@ class _PlanScreenState extends State<PlanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Method build() digunakan untuk membangun UI setiap kali ada perubahan
-    return Scaffold( // Scaffold adalah kerangka dasar untuk UI (appBar, body, FAB, dll)
-      appBar: AppBar(
-        title: const Text('Master Plan Namaku'),
-        // Menampilkan judul di AppBar. Ganti "Namaku" dengan nama kamu!
+    return Scaffold(
+      appBar: AppBar(title: const Text('Master Plan')),
+      body: ValueListenableBuilder<Plan>(
+        valueListenable: PlanProvider.of(context),
+        builder: (context, plan, child) {
+          return Column(
+            children: [
+              Expanded(child: _buildList(plan)),
+              SafeArea(child: Text(plan.completenessMessage))
+            ],
+          );
+        },
       ),
-      body: _buildList(), // Bagian utama isi halaman: menampilkan daftar task
-      floatingActionButton: _buildAddTaskButton(), // Tombol tambah task di kanan bawah
+      floatingActionButton: _buildAddTaskButton(context),
     );
   }
 
   // Method untuk membangun tombol '+' (FloatingActionButton)
-  Widget _buildAddTaskButton() {
+  Widget _buildAddTaskButton(BuildContext context) {
+    ValueNotifier<Plan> planNotifier = PlanProvider.of(context);
     return FloatingActionButton(
-      child: const Icon(Icons.add), // Ikon tambah
+      child: const Icon(Icons.add),
       onPressed: () {
-        // Fungsi yang dijalankan saat tombol ditekan
-        setState(() {
-          // setState memberi tahu Flutter bahwa UI perlu diperbarui
-          plan = Plan(
-            name: plan.name, // Nama plan tetap
-            tasks: List<Task>.from(plan.tasks) // Salin daftar task yang ada
-              ..add(const Task()), // Tambahkan task kosong baru
-          );
-        });
+        Plan currentPlan = planNotifier.value;
+        planNotifier.value = Plan(
+          name: currentPlan.name,
+          tasks: List<Task>.from(currentPlan.tasks)..add(const Task()),
+        );
       },
     );
   }
 
+
+
+
   // Method untuk menampilkan daftar task menggunakan ListView
-  Widget _buildList() {
+  Widget _buildList(Plan plan) {
     return ListView.builder(
-      itemCount: plan.tasks.length, // Jumlah item dalam daftar = jumlah task
-      controller: scrollController, // Pasang controller supaya bisa deteksi scroll
-      keyboardDismissBehavior: Theme.of(context).platform ==
-          TargetPlatform.iOS
-          ? ScrollViewKeyboardDismissBehavior.onDrag
-          : ScrollViewKeyboardDismissBehavior.manual,
+      controller: scrollController,
+      itemCount: plan.tasks.length,
       itemBuilder: (context, index) =>
-          _buildTaskTile(plan.tasks[index], index),
-      // Untuk setiap index, buat widget _buildTaskTile untuk menampilkan task-nya
+          _buildTaskTile(plan.tasks[index], index, context),
     );
   }
 
-  // Method untuk membangun tampilan satu item (satu task)
-  Widget _buildTaskTile(Task task, int index) {
-    return ListTile( // ListTile adalah widget yang biasa digunakan di list
-      leading: Checkbox( // Kotak cek di sisi kiri list
-        value: task.complete, // Status selesai atau belum dari task
+
+
+    // Method untuk membangun tampilan satu item (satu task)
+  Widget _buildTaskTile(Task task, int index, BuildContext context) {
+    ValueNotifier<Plan> planNotifier = PlanProvider.of(context);
+    return ListTile(
+        leading: Checkbox(
+        value: task.complete,
         onChanged: (selected) {
-          // Jika user klik checkbox, ubah status complete task
-          setState(() {
-            // Perbarui UI
-            plan = Plan(
-              name: plan.name, // Nama plan tetap
-              tasks: List<Task>.from(plan.tasks)
-                ..[index] = Task(
-                  description: task.description, // Deskripsi tetap
-                  complete: selected ?? false, // Ganti status complete
-                ),
-            );
-          });
-        },
-      ),
-      title: TextFormField( // Field input teks (untuk deskripsi task)
-        initialValue: task.description, // Nilai awal deskripsi task
-        onChanged: (text) {
-          // Jika user mengetik sesuatu di deskripsi
-          setState(() {
-            // Update UI dan plan
-            plan = Plan(
-              name: plan.name, // Nama tetap
-              tasks: List<Task>.from(plan.tasks)
-                ..[index] = Task(
-                  description: text, // Ganti deskripsi dengan teks yang baru
-                  complete: task.complete, // Status complete tetap sama
-                ),
-            );
-          });
-        },
-      ),
+      Plan currentPlan = planNotifier.value;
+      planNotifier.value = Plan(
+        name: currentPlan.name,
+        tasks: List<Task>.from(currentPlan.tasks)
+          ..[index] = Task(
+            description: task.description,
+            complete: selected ?? false,
+          ),
+      );
+    }),
+    title: TextFormField(
+    initialValue: task.description,
+    onChanged: (text) {
+    Plan currentPlan = planNotifier.value;
+    planNotifier.value = Plan(
+    name: currentPlan.name,
+    tasks: List<Task>.from(currentPlan.tasks)
+    ..[index] = Task(
+    description: text,
+    complete: task.complete,
+    ),
+    );
+    },
+    ),
     );
   }
-}
+
+  }
+
 
 
 
