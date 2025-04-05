@@ -100,4 +100,34 @@ A new Flutter project.
    Ini menunjukkan penggunaan state yang reaktif: perubahan data langsung memicu rebuild UI melalui `ValueListenableBuilder` yang mendengarkan perubahan `Plan`.
 
 
+---
+
+### ✅ Jawaban Praktikum 3
+
+1. **Telah Terselesaikan Tanpa Error**  
+   Praktikum ini berhasil diselesaikan dengan fitur lengkap:
+   - Menambahkan rencana baru dari `PlanCreatorScreen`
+   - Melihat detail dan mengelola task dari masing-masing rencana di `PlanScreen`
+   - Task bisa ditambah, diisi, dan ditandai selesai  
+   State dikelola dengan baik menggunakan `InheritedNotifier<ValueNotifier<List<Plan>>>`, dan tetap sinkron antar layar.
+
+2. **Penjelasan Gambar Diagram**  
+   Diagram menggambarkan alur navigasi dan struktur UI:
+   - Tampilan awal: `PlanCreatorScreen`, berisi `TextField` + `ListView` daftar rencana
+   - Ketika salah satu rencana dipilih, pengguna diarahkan ke `PlanScreen` via `Navigator.push`
+   - Di `PlanScreen`: tampil daftar task serta informasi “X out of Y tasks”  
+   Diagram juga menunjukkan bahwa `Column` digunakan dengan `Expanded` untuk daftar task, dan informasi status diletakkan di bawah dengan `SafeArea`.  
+   Yang paling penting, state tetap dipertahankan saat berpindah antar layar, sehingga data tetap sinkron.
+
+3. **Penjelasan Langkah 14 dan GIF**  
+   GIF menunjukkan interaksi berikut:
+   - Menambahkan rencana baru
+   - Masuk ke rencana → menambahkan task
+   - Mencentang task yang selesai
+   - Status “X out of Y tasks” berubah otomatis  
+   Ini menunjukkan bahwa aplikasi berhasil menerapkan **multi-screen state management** menggunakan `InheritedNotifier`, di mana semua perubahan state tetap konsisten dan UI meresponsnya secara real-time.
+
+---
+
+
 
